@@ -108,11 +108,16 @@ class Chute
 
   def pipe_to_command(command, input, *args)
     result = nil
-    Open3.popen3(command, *args) do |stdin, stdout, stderr, thread|
-      stdin.write(input)
-      stdin.close()
-      result = stdout.read()
-      thread.value
+    begin
+      Open3.popen3(command, *args) do |stdin, stdout, stderr, thread|
+        stdin.write(input)
+        stdin.close()
+        result = stdout.read()
+        thread.value
+      end
+    rescue Errno::ENOENT
+      puts "Could not execute: #{command}";
+      exit
     end
 
     return result
